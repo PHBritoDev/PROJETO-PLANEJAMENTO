@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071425">
+<meta name="description" content="UTI Smart: protótipo educacional de previsão de ocupação de leitos de UTI com mini IA e visualização 3D leve.">
+<title>UTI Smart • Leitos Inteligentes</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#071425;color:#ebf7ff;font-synthesis:none}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse 900px 490px at 80% -8%,#123c52 0,transparent 77%),linear-gradient(155deg,#071425,#09182a 67%,#071425)}
+button,input{font:inherit}button{cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid #bce8f6;outline-offset:3px}
+.wrap{max-width:1120px;margin:auto;padding:20px 18px 44px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.brand{display:flex;gap:11px;align-items:center}
+.mark{height:44px;width:44px;border-radius:13px;background:linear-gradient(140deg,#44dbc3,#a2f1dc);color:#082532;display:grid;place-items:center;font-size:25px;font-weight:900;box-shadow:0 5px 26px #16bcab35}
+.brand strong{font-size:20px;letter-spacing:-.5px}.brand small{display:block;font-size:11px;color:#a1b9cc;letter-spacing:.6px;margin-top:1px}
+.badge{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;font-size:11px;line-height:1.2;border:1px solid #2d6f6d;background:#123735;color:#a1f8e4;font-weight:750}
+.hero{display:grid;grid-template-columns:1.25fr .75fr;gap:24px;align-items:center;padding:38px 0 30px}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:2.3px;color:#7fe8d7;font-weight:750}
+h1{font-size:clamp(33px,5.3vw,57px);letter-spacing:-2px;line-height:1.075;margin:13px 0 16px}
+h1 em{font-style:normal;color:#75e2d5}
+.lead{max-width:630px;color:#b5c9db;line-height:1.65;margin:0}
+.hero-card{border:1px solid #265063;border-radius:19px;background:linear-gradient(150deg,#132c3d,#0d2436);padding:20px}
+.hero-card .pulse{font-size:32px;color:#7ae8d6;letter-spacing:5px;margin-bottom:8px}
+.hero-card h2{font-size:17px;margin:6px 0 9px}
+.hero-card p{margin:0;color:#afc7d7;line-height:1.6;font-size:13px}
+.nav{display:flex;flex-wrap:wrap;gap:8px;padding-bottom:20px}
+.nav button{padding:12px 15px;border:1px solid #28435a;border-radius:11px;background:#12273c;color:#b9cede;font-size:13px;font-weight:750;transition:background .2s,border-color .2s}
+.nav button[aria-selected="true"]{background:#1b6a66;border-color:#44cfb9;color:#f7fffd}
+.tabpanel[hidden]{display:none}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.box{background:linear-gradient(150deg,#132a40,#0c1c2e);border:1px solid #263d52;border-radius:17px;padding:19px;min-width:0}
+.box h2{font-size:18px;margin:0 0 14px;letter-spacing:-.4px}
+.stat{padding:17px 18px}
+.label{font-size:12px;color:#a5bbcf}
+.number{display:block;font-size:clamp(26px,3.1vw,38px);font-weight:840;letter-spacing:-1.1px;margin:7px 0 3px}
+.stat small{font-size:11px;color:#9ab0c5}
+.cyan{color:#7cddcf}.danger{color:#ff8793}.amber{color:#f5c278}
+.main-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}
+.full{grid-column:1/-1}
+.section-hd{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.mini{font-size:11px;color:#9eb8cc}
+#visual3d{height:225px;border:1px solid #24475b;border-radius:13px;overflow:hidden;position:relative;background:radial-gradient(ellipse at 50% 35%,#174154,#071928 75%);margin-top:10px}
+#visual3d canvas{width:100%;height:100%;display:block}
+.visual-label{position:absolute;left:11px;top:11px;z-index:1;background:#081a2dc9;border:1px solid #325264;padding:6px 9px;border-radius:8px;font-size:11px;color:#b8dfeb;pointer-events:none}
+#fallback3d{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px;color:#b9d0dd;font-size:13px}
+.bed-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin-top:16px}
+.bed{height:21px;border-radius:6px;border:1px solid #3b978d;background:#1c655e;position:relative}
+.bed.used{background:#80404d;border-color:#d07580}
+.bed:before{content:"+";display:grid;place-items:center;position:absolute;inset:0;font-size:12px;color:#adf4e6;font-weight:800}
+.bed.used:before{content:"●";font-size:10px;color:#ffc1c8}
+.legend{display:flex;gap:17px;flex-wrap:wrap;color:#a6bdcb;font-size:11px;margin:10px 0 0}
+.dot{display:inline-block;height:8px;width:8px;border-radius:50%;background:#4bd8c0;margin-right:5px}
+.dot.red{background:#ed8291}
+.meter{height:10px;background:#294052;border-radius:20px;overflow:hidden;margin:9px 0}
+.meter span{display:block;height:100%;width:0;background:linear-gradient(90deg,#2db79f,#7cedda);transition:width .3s}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.field{margin:17px 0}
+.field label{font-size:13px;color:#d2e5ee}
+.field output{color:#7bedd8;font-size:15px;font-weight:800}
+input[type=range]{display:block;width:100%;margin-top:9px;accent-color:#3bd2bb;cursor:pointer}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:17px}
+.action{border:0;border-radius:10px;padding:12px 14px;background:#42d5bd;color:#092432;font-size:13px;font-weight:850}
+.action.alt{background:#234157;color:#e1f3fa}
+.notice{padding:14px 16px;border-radius:13px;background:#133a34;border:1px solid #36776b;margin-top:14px}
+.notice.warn{background:#493b24;border-color:#9c7839}
+.notice.critical{background:#522933;border-color:#af5366}
+.notice b{display:block;font-size:14px;margin-bottom:5px}
+.notice p{margin:0;font-size:12px;line-height:1.65;color:#dce8ed}
+.forecast{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-top:13px}
+.forecast article{padding:14px;border:1px solid #2a435b;background:#0b1e30;border-radius:13px}
+.forecast strong{display:block;font-size:25px;letter-spacing:-.8px;margin:7px 0}
+.forecast small{color:#aac0d3;font-size:11px}
+.forecast .meter{height:6px;margin:10px 0 0}
+.steps{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin:12px 0}
+.steps span{background:#17364a;border:1px solid #294e5f;padding:9px 11px;border-radius:9px;font-size:12px;color:#c8e3ec}
+.explain{font-size:12px;line-height:1.65;color:#b4c6d4}
+.info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.info-grid h3{margin:0 0 9px;color:#76e2d0;font-size:15px}
+.info-grid p{font-size:13px;color:#cadbe6;line-height:1.65;margin:0}
+.pitch-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.pitch-grid h3{font-size:16px;color:#8fe8d8;margin:0 0 12px}
+.pitch-grid p{font-size:14px;color:#d6e4eb;line-height:1.75}
+.hr{height:1px;background:#29465b;margin:20px 0}
+footer{text-align:center;color:#87a0b4;font-size:11px;line-height:1.7;margin-top:32px}
+.bullets{margin:9px 0 0;padding-left:20px;color:#cbdde7;font-size:13px;line-height:1.75}
+.model-tag{color:#baf2e4;background:#153f3d;border-radius:7px;padding:6px 9px;font-size:11px;display:inline-block;margin-top:8px}
+@media(max-width:850px){.hero{grid-template-columns:1fr}.hero-card{display:none}.main-grid,.pitch-grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.wrap{padding:15px 13px 34px}.hero{padding:24px 0 22px}h1{font-size:36px}.box{padding:16px}.stat{padding:14px}.stats{gap:8px}.forecast{gap:6px}.forecast article{padding:10px}.forecast strong{font-size:20px}.info-grid{grid-template-columns:1fr}.bed-grid{gap:4px}.bed{height:20px}.nav button{flex:1;padding:11px 9px;font-size:12px}#visual3d{height:205px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div class="brand"><div class="mark" aria-hidden="true">✚</div><div><strong>UTI <span class="cyan">Smart</span></strong><small>LEITOS INTELIGENTES</small></div></div><span class="badge">● PROTÓTIPO ESCOLAR</span></header>
+<section class="hero"><div><div class="eyebrow">Projeto de inovação • Inteligência Artificial</div><h1>Prever a demanda.<br><em>Preparar para salvar.</em></h1><p class="lead">Um painel inteligente que simula a ocupação da UTI, estima a necessidade de leitos e mostra alertas antecipados. Feito para explicar como IA pode apoiar o planejamento hospitalar.</p></div><aside class="hero-card"><div class="pulse">♡ ━╋━ ♡</div><div class="badge">● Dados demonstrativos</div><h2>Antecipar é melhor do que reagir.</h2><p>Ao prever possíveis picos de demanda, a equipe pode planejar pessoal e recursos sem substituir decisões médicas.</p></aside></section>
+<nav class="nav" aria-label="Navegação do projeto">
+<button type="button" aria-controls="dashboard" aria-selected="true" data-tab="dashboard">📊 Painel</button>
+<button type="button" aria-controls="inteligencia" aria-selected="false" data-tab="inteligencia">🧠 Mini IA</button>
+<button type="button" aria-controls="proposta" aria-selected="false" data-tab="proposta">📋 Proposta</button>
+<button type="button" aria-controls="pitch" aria-selected="false" data-tab="pitch">🎤 Pitch</button>
+</nav>
+<main>
+<section id="dashboard" class="tabpanel">
+<div class="stats">
+<article class="box stat"><span class="label">Capacidade total</span><strong class="number" id="s-total">20</strong><small>Leitos disponíveis na UTI</small></article>
+<article class="box stat"><span class="label">Ocupados agora</span><strong class="number" id="s-used">15</strong><small>Pacientes internados</small></article>
+<article class="box stat"><span class="label">Ocupação atual</span><strong class="number" id="s-rate">75%</strong><small>Percentual de uso</small></article>
+<article class="box stat"><span class="label">Cenário para 24h</span><strong class="number cyan" id="s-day1">90%</strong><small>Internações − altas previstas</small></article>
+</div>
+<div class="main-grid">
+<article class="box"><div class="section-hd"><h2>UTI em tempo real</h2><span class="badge">Vista 3D opcional</span></div><div class="row mini"><span>Ocupação atual</span><b id="meter-text">15 de 20</b></div><div class="meter"><span id="meter-fill"></span></div><div id="visual3d" aria-label="Representação tridimensional de até 50 leitos; vermelho significa ocupado e verde livre"><span class="visual-label">Visualização 3D leve • Three.js</span><div id="fallback3d">Preparando visualização 3D…<br>O painel continua funcionando sem 3D.</div></div><div id="bed-grid" class="bed-grid" aria-label="Mapa dos leitos"></div><div class="legend"><span><i class="dot red"></i>Ocupado</span><span><i class="dot"></i>Livre</span></div><div id="notice" class="notice" role="status" aria-live="polite"><b id="notice-title"></b><p id="notice-text"></p></div></article>
+<article class="box"><h2>Simulador interativo</h2><p class="explain">Arraste os controles ou use os exemplos prontos durante a apresentação.</p>
+<div class="field"><div class="row"><label for="total">Total de leitos</label><output id="o-total" for="total">20</output></div><input id="total" type="range" min="10" max="50" step="1" value="20"></div>
+<div class="field"><div class="row"><label for="used">Leitos ocupados agora</label><output id="o-used" for="used">15</output></div><input id="used" type="range" min="0" max="20" step="1" value="15"></div>
+<div class="field"><div class="row"><label for="arrivals">Entradas esperadas nas próximas 24h</label><output id="o-arrivals" for="arrivals">5</output></div><input id="arrivals" type="range" min="0" max="20" step="1" value="5"></div>
+<div class="field"><div class="row"><label for="leavings">Altas esperadas nas próximas 24h</label><output id="o-leavings" for="leavings">2</output></div><input id="leavings" type="range" min="0" max="20" step="1" value="2"></div>
+<div class="actions"><button class="action" id="busy" type="button">⚠ Simular lotação</button><button class="action alt" id="reset" type="button">↻ Exemplo inicial</button></div></article>
+<article class="box full"><div class="section-hd"><h2>Previsão de demanda</h2><span class="mini">24h: cenário escolhido • 48/72h: mini IA</span></div><div id="forecasts" class="forecast" aria-label="Previsões para os próximos três dias"></div><p class="explain" style="margin-bottom:0">As porcentagens acima podem ultrapassar 100%: isso representa a <b>demanda estimada</b>, não pessoas internadas além da capacidade.</p></article>
+</div>
+</section>
+<section id="inteligencia" class="tabpanel" hidden>
+<div class="main-grid">
+<article class="box"><h2>🧠 Como funciona a mini IA?</h2><p class="explain">Este protótipo contém um modelo simples de <strong>aprendizado de máquina (regressão)</strong> executado diretamente no navegador, sem servidor. Ele aprende tendências e variações semanais em <strong>49 dias de dados fictícios</strong> para estimar novas internações e altas dos dias seguintes.</p><div class="steps"><span>49 dias simulados</span>→<span>Treinamento local</span>→<span>Estimativas 48/72h</span>→<span>Alertas</span></div><span class="model-tag" id="model-status">Treinando modelo demonstrativo…</span><p class="explain">O primeiro dia utiliza as entradas e altas indicadas nos controles. Os dias 2 e 3 utilizam as estimativas da mini IA. O modelo é recalculado quando os controles mudam.</p><h2 style="margin-top:22px">O que ela ainda não faz?</h2><p class="explain">Não foi treinada em informações de pacientes reais, não calcula probabilidade clínica de internação e <strong>não serve para decisões hospitalares reais</strong>. Uma versão profissional exigiria dados históricos autorizados, validação rigorosa, monitoramento e supervisão humana.</p></article>
+<article class="box"><h2>Exemplo de análise automatizada</h2><div id="ai-summary" class="notice" role="status"><b>Analisando…</b></div><h2 style="margin-top:22px">Recomendações educativas</h2><ul class="bullets" id="advice-list"><li>Atualizar dados frequentemente.</li></ul><div class="actions"><button class="action" type="button" data-go="dashboard">Abrir simulador →</button></div></article>
+</div>
+</section>
+<section id="proposta" class="tabpanel" hidden><div class="info-grid">
+<article class="box"><h3>1. Nome do projeto</h3><p>UTI Smart — Leitos Inteligentes.</p></article>
+<article class="box"><h3>2. Problema a ser resolvido</h3><p>Hospitais podem enfrentar falta de leitos de terapia intensiva durante aumentos repentinos na demanda, prejudicando o planejamento e atrasando internações.</p></article>
+<article class="box"><h3>3. Público beneficiado</h3><p>Pacientes que precisam de UTI, médicos, enfermeiros e equipes responsáveis pela administração hospitalar.</p></article>
+<article class="box"><h3>4. Qual foi o uso da IA?</h3><p>Aprender padrões de entradas e saídas de pacientes e ajudar a estimar a demanda por leitos. Aqui demonstramos a ideia com um modelo de regressão treinado em dados fictícios.</p></article>
+<article class="box"><h3>5. Dados necessários</h3><p>Capacidade total, leitos ocupados, históricos de internação e alta, tempo de permanência e variação da procura ao longo dos dias.</p></article>
+<article class="box"><h3>6. Funcionamento do projeto</h3><p>Os dados alimentam um painel. O sistema calcula a ocupação atual, prevê demanda para 24, 48 e 72 horas e emite alertas quando há risco de superar a capacidade.</p></article>
+<article class="box"><h3>7. Benefícios</h3><p>Antecipação de riscos, melhor distribuição de recursos, organização das equipes e mais informações para apoiar decisões dos gestores.</p></article>
+<article class="box"><h3>8. Limitações</h3><p>Dados incompletos, eventos inesperados e previsões erradas. É necessário proteger dados pessoais e garantir supervisão de profissionais. A IA não cria novos leitos.</p></article>
+</div></section>
+<section id="pitch" class="tabpanel" hidden>
+<div class="section-hd"><h2>Apresentação em dupla • 3 a 4 minutos</h2><span class="badge">2 integrantes</span></div>
+<div class="pitch-grid">
+<article class="box"><h3>🎙 Integrante 1 — Problema + proposta</h3><p>Bom dia! Nosso projeto se chama UTI Smart — Leitos Inteligentes.</p><p>Imagine um hospital com poucos leitos de UTI disponíveis. Quando chegam muitos pacientes graves ao mesmo tempo, pode faltar espaço, e o atendimento fica mais difícil.</p><p>Por isso, nossa proposta é uma inteligência artificial capaz de ajudar a prever a demanda por leitos antes da superlotação acontecer.</p><p>O sistema analisaria dados como número de leitos, internações, altas e tempo de permanência dos pacientes. Com isso, poderia apontar riscos para as próximas 24, 48 e 72 horas.</p><p>Os principais beneficiados seriam pacientes e profissionais de saúde. Agora vamos mostrar nosso protótipo.</p></article>
+<article class="box"><h3>🎙 Integrante 2 — Demonstração + conclusão</h3><p>Este é o UTI Smart funcionando em uma simulação. Veja: temos 20 leitos e 15 ocupados.</p><p>Se cinco pacientes chegarem e dois receberem alta, a demanda será de 18 leitos, ou seja, 90% da capacidade. O painel mostra um alerta e atualiza a visualização em 3D.</p><p><b>[Clique em “Simular lotação”.]</b> Agora a procura passa da capacidade, então o sistema informa quantos leitos adicionais seriam necessários.</p><p>Também criamos uma mini IA, que aprende padrões de dados fictícios e faz estimativas para os dias seguintes.</p><p>Os benefícios são melhorar o planejamento, preparar equipes e antecipar problemas. Mas as previsões podem errar e nunca devem substituir os médicos.</p><p>Nosso protótipo é educativo, ainda não é uma ferramenta hospitalar validada. A ideia principal é simples: é melhor se preparar antes da emergência do que agir apenas depois dela. Muito obrigado!</p></article>
+</div><div class="actions"><button class="action" type="button" data-go="dashboard">Mostrar o painel na apresentação →</button></div>
+</section>
+</main>
+<footer>UTI Smart • Projeto escolar de inovação • Dados 100% fictícios • Não utilizar para diagnóstico, triagem ou decisões clínicas reais • O 3D requer internet para carregar a biblioteca Three.js.</footer>
+</div>
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id)};
+var controls=['total','used','arrivals','leavings'];
+var modelInfo={error:0};
+var lastState=null;
+function tab(id){document.querySelectorAll('[data-tab]').forEach(function(b){b.setAttribute('aria-selected',String(b.dataset.tab===id))});document.querySelectorAll('.tabpanel').forEach(function(p){p.hidden=p.id!==id});if(id==='dashboard'&&window.UTI3D&&window.UTI3D.resize)window.UTI3D.resize()}
+document.querySelectorAll('[data-tab]').forEach(function(b){b.addEventListener('click',function(){tab(b.dataset.tab)})});
+document.querySelectorAll('[data-go]').forEach(function(b){b.addEventListener('click',function(){tab(b.dataset.go)})});
+function num(v,min,max){return Math.max(min,Math.min(max,v))}
+function seedNoise(i){var x=Math.sin(i*12.9898+1.2345)*43758.5453;return (x-Math.floor(x))*2-1}
+function features(i){return [1,(i-24)/24,Math.sin(i*2*Math.PI/7),Math.cos(i*2*Math.PI/7),Math.sin(i*.24)]}
+function history(a,d){var list=[];for(var i=0;i<49;i++){list.push({i:i,a:num(Math.round(a+1.2*Math.sin(i*.24)+.75*Math.cos(i*2*Math.PI/7)+.6*seedNoise(i)),0,20),d:num(Math.round(d+.85*Math.sin((i+5)*.24)+.55*Math.cos((i+1)*2*Math.PI/7)+.45*seedNoise(i+84)),0,20)})}return list}
+function train(rows,key){var w=[0,0,0,0,0];for(var e=0;e<320;e++){var g=[0,0,0,0,0];rows.forEach(function(r){var f=features(r.i),pred=0;for(var j=0;j<5;j++)pred+=w[j]*f[j];var diff=pred-r[key]/10;for(var k=0;k<5;k++)g[k]+=diff*f[k]});for(var k=0;k<5;k++)w[k]-=.075*(g[k]/rows.length+(k===0?0:.003*w[k]))}var err=0;rows.forEach(function(r){err+=Math.abs(predict(w,r.i)-r[key])});return {w:w,mae:err/rows.length}}
+function predict(w,i){var f=features(i),sum=0;for(var j=0;j<5;j++)sum+=w[j]*f[j];return num(Math.round(sum*10),0,20)}
+function data(){return {total:+$('total').value,used:+$('used').value,arrivals:+$('arrivals').value,leavings:+$('leavings').value}}
+function alertFor(pct,gap){if(gap>0)return {type:'critical',name:'🚨 Capacidade insuficiente',text:'A demanda estimada supera a capacidade em '+gap+' leito(s). É necessário planejar alternativas de atendimento.'};if(pct>=90)return {type:'critical',name:'⚠️ Risco alto de lotação',text:'A demanda de 24 horas alcança '+pct+'% da capacidade. A equipe deve se preparar e monitorar as internações.'};if(pct>=75)return {type:'warn',name:'⚠️ Risco moderado',text:'A demanda está em '+pct+'% da capacidade. Recomenda-se acompanhar os dados e revisar os recursos disponíveis.'};return {type:'ok',name:'✓ Risco baixo na simulação',text:'A demanda estimada permanece abaixo de 75%. Continue acompanhando as atualizações.'}}
+function render(){
+var s=data();$('used').max=s.total;if(s.used>s.total){$('used').value=s.total;s.used=s.total}
+controls.forEach(function(k){$('o-'+k).textContent=$(k).value});
+var rows=history(s.arrivals,s.leavings),ma=train(rows,'a'),md=train(rows,'d');
+var day1=Math.max(0,s.used+s.arrivals-s.leavings),day2=Math.max(0,day1+predict(ma.w,49)-predict(md.w,49)),day3=Math.max(0,day2+predict(ma.w,50)-predict(md.w,50));
+var projected=[day1,day2,day3],demand=projected.map(function(v){return Math.round(v/s.total*100)});
+var pct=Math.round(s.used/s.total*100);
+modelInfo.error=(ma.mae+md.mae)/2;
+$('model-status').textContent='✓ Regressão treinada em 49 dias fictícios • erro médio de treinamento: '+modelInfo.error.toFixed(1)+' paciente(s)/dia';
+$('s-total').textContent=s.total;$('s-used').textContent=s.used;$('s-rate').textContent=pct+'%';$('s-day1').textContent=demand[0]+'%';
+$('s-day1').className='number '+(demand[0]>=90?'danger':'cyan');
+$('meter-text').textContent=s.used+' de '+s.total;
+$('meter-fill').style.width=Math.min(100,pct)+'%';
+var beds=$('bed-grid');beds.replaceChildren();
+for(var i=0;i<s.total;i++){var b=document.createElement('div');b.className='bed'+(i<s.used?' used':'');b.title='Leito '+(i+1)+': '+(i<s.used?'ocupado':'livre');beds.appendChild(b)}
+var al=alertFor(demand[0],Math.max(0,day1-s.total));
+$('notice').className='notice '+al.type;$('notice-title').textContent=al.name;$('notice-text').textContent=al.text;
+var forecast=$('forecasts');forecast.replaceChildren();
+projected.forEach(function(v,i){var article=document.createElement('article'),tiny=document.createElement('small'),bold=document.createElement('strong'),detail=document.createElement('small'),meter=document.createElement('div'),span=document.createElement('span');tiny.textContent=(i+1)*24+' horas';bold.textContent=demand[i]+'%';if(demand[i]>=90)bold.className='danger';detail.textContent=v+' leitos necessários'+(v>s.total?' • faltam '+(v-s.total):'');meter.className='meter';span.style.width=Math.min(100,demand[i])+'%';if(demand[i]>=90)span.style.background='linear-gradient(90deg,#f0a460,#ea657e)';meter.appendChild(span);article.append(tiny,bold,detail,meter);forecast.appendChild(article)});
+var highest=Math.max.apply(null,demand);$('ai-summary').className='notice '+(highest>=90?'critical':highest>=75?'warn':'');
+$('ai-summary').innerHTML='';
+var title=document.createElement('b'),msg=document.createElement('p');title.textContent=highest>=90?'⚠️ A mini IA sinaliza atenção':highest>=75?'Monitoramento recomendado':'✓ Demanda simulada controlada';
+msg.textContent='Nas próximas 72 horas, a maior demanda estimada é de '+highest+'% da capacidade. O cenário usa números fictícios e serve apenas para demonstração escolar.';$('ai-summary').append(title,msg);
+var advice=$('advice-list');advice.replaceChildren();[
+'Conferir a atualização dos dados de ocupação e de altas.',
+highest>=90?'Avaliar antecipadamente equipes, recursos e alternativas para leitos.':'Continuar monitorando a procura e manter um plano de contingência.',
+'Nunca usar este protótipo para decidir a internação de pacientes reais.'
+].forEach(function(t){var li=document.createElement('li');li.textContent=t;advice.appendChild(li)});
+lastState=s;if(window.UTI3D&&window.UTI3D.update)window.UTI3D.update(s.total,s.used);
+}
+controls.forEach(function(k){$(k).addEventListener('input',render)});
+function scenario(o){Object.keys(o).forEach(function(k){$(k).value=o[k]});render()}
+$('reset').addEventListener('click',function(){scenario({total:20,used:15,arrivals:5,leavings:2})});
+$('busy').addEventListener('click',function(){scenario({total:20,used:18,arrivals:8,leavings:1})});
+window.UTISync3D=function(){if(lastState&&window.UTI3D&&window.UTI3D.update)window.UTI3D.update(lastState.total,lastState.used)};
+render();
+})();
+</script>
+<script type="module">
+(async function(){
+let mount=document.getElementById('visual3d'),fallback=document.getElementById('fallback3d');
+if(!mount)return;
+try{
+if(!document.createElement('canvas').getContext('webgl'))throw Error('WebGL não suportado');
+const THREE=await import('https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js');
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(43,1,.1,100);camera.position.set(9,11,14);camera.lookAt(0,0,0);
+const renderer=new THREE.WebGLRenderer({antialias:false,alpha:true,powerPreference:'low-power'});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.25));
+renderer.setClearColor(0x071928,0);
+mount.appendChild(renderer.domElement);
+scene.add(new THREE.AmbientLight(0xc3edff,1.4));
+const light=new THREE.DirectionalLight(0xffffff,1.2);light.position.set(5,10,7);scene.add(light);
+const group=new THREE.Group();scene.add(group);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(13,9),new THREE.MeshBasicMaterial({color:0x173448,transparent:true,opacity:.45,side:THREE.DoubleSide}));floor.rotation.x=-Math.PI/2;floor.position.y=-.17;group.add(floor);
+const grid=new THREE.GridHelper(13,13,0x426879,0x244558);grid.position.y=-.16;group.add(grid);
+const geom=new THREE.BoxGeometry(.87,.25,1.12),pillowGeom=new THREE.BoxGeometry(.7,.14,.32);
+const mat=new THREE.MeshLambertMaterial({color:0xffffff}),pillowMat=new THREE.MeshLambertMaterial({color:0xe7f8ff});
+const units=new THREE.InstancedMesh(geom,mat,50),pillows=new THREE.InstancedMesh(pillowGeom,pillowMat,50);
+units.instanceMatrix.setUsage(THREE.DynamicDrawUsage);pillows.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+group.add(units,pillows);
+const obj=new THREE.Object3D(),color=new THREE.Color();
+const active=0x44d8bf,inactive=0xc85b6b;
+function update(total,used){
+for(let i=0;i<50;i++){
+let x=(i%10-4.5)*1.17,z=(Math.floor(i/10)-2)*1.57;
+obj.position.set(x,0,z);obj.rotation.set(0,0,0);obj.scale.setScalar(i<total?1:.001);obj.updateMatrix();units.setMatrixAt(i,obj.matrix);
+obj.position.y=.24;obj.position.z=z-.27;obj.updateMatrix();pillows.setMatrixAt(i,obj.matrix);
+color.setHex(i<used?inactive:active);units.setColorAt(i,color);
+}
+units.instanceMatrix.needsUpdate=true;pillows.instanceMatrix.needsUpdate=true;
+if(units.instanceColor)units.instanceColor.needsUpdate=true;
+renderOnce();
+}
+let width=0,height=0;function resize(){const rect=mount.getBoundingClientRect();if(!rect.width||!rect.height)return;width=rect.width;height=rect.height;renderer.setSize(width,height,false);camera.aspect=width/height;camera.updateProjectionMatrix();renderOnce()}
+function renderOnce(){if(!width)return;renderer.render(scene,camera)}
+const ro=new ResizeObserver(resize);ro.observe(mount);resize();
+let visible=true;const io=new IntersectionObserver(e=>{visible=e[0].isIntersecting},{threshold:.01});io.observe(mount);
+const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let prev=0;function tick(t){requestAnimationFrame(tick);if(document.hidden||!visible||reduced||t-prev<60)return;prev=t;group.rotation.y=.12*Math.sin(t*.00016);renderOnce()}
+if(!reduced)requestAnimationFrame(tick);
+window.UTI3D={update:update,resize:resize};if(fallback)fallback.remove();
+if(window.UTISync3D)window.UTISync3D();
+}catch(e){if(fallback)fallback.innerHTML='Visualização 3D indisponível nesta conexão.<br>Simulação e mini IA continuam funcionando normalmente.'}
+})();
+</script>
+</body></html>
